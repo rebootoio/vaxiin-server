@@ -24,7 +24,7 @@
 </div>
 
 ## Quick Start Guide
-To get started quickly with all the component, follow the guide at the [sandbox repository](https://github.com/rebootoio/vaxiin-sandbox)
+To get started quickly with all of the components, follow the guide at the [sandbox repository](https://github.com/rebootoio/vaxiin-sandbox)
 
 
 ## Components
