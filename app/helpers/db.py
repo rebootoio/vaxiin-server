@@ -16,3 +16,14 @@ def get_db(db_path):
         dbapi_conn.execute(f'ATTACH DATABASE "{db_path}/vaxiin.db" AS "{SCHEMA}"')
 
     return engine, SessionLocal
+
+
+def get_test_db():
+    engine = create_engine(f"sqlite://")
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    @event.listens_for(engine, "connect")
+    def connect(dbapi_conn, rec):
+        dbapi_conn.execute(f'ATTACH DATABASE ":memory:" AS "{SCHEMA}"')
+
+    return engine, SessionLocal
