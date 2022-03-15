@@ -108,23 +108,32 @@ def _filter_by_regex(state_list, regex):
 
 
 def create_or_update(*, device_uid, screenshot):
-    # TODO - handle and throw DeviceNotFound Error
     decoded_screenshot = base64.b64decode(screenshot.encode('ascii'))
     ocr_text = pytesseract.image_to_string(Image.open(io.BytesIO(decoded_screenshot)))
+    return _create_or_update(device_uid=device_uid, screenshot=decoded_screenshot, ocr_text=ocr_text)
 
+
+def create_or_update_from_file(*, device_uid, screenshot):
+    screenshot_to_save = screenshot.read()
+    ocr_text = pytesseract.image_to_string(Image.open(screenshot))
+    return _create_or_update(device_uid=device_uid, screenshot=screenshot_to_save, ocr_text=ocr_text)
+
+
+def _create_or_update(*, device_uid, screenshot, ocr_text):
+    # TODO - handle and throw DeviceNotFound Error
     try:
         state = get_open_by_device(device_uid)
 
     except StateNotFoundForDevice:
         state = State(
-            screenshot=decoded_screenshot,
+            screenshot=screenshot,
             ocr_text=ocr_text,
             device_uid=device_uid
         )
         app.session.add(state)
 
     else:
-        state.screenshot = decoded_screenshot
+        state.screenshot = screenshot
         state.ocr_text = ocr_text
 
     app.session.commit()

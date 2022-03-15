@@ -1,3 +1,4 @@
+import werkzeug
 from flask_restplus import reqparse, inputs
 
 
@@ -89,6 +90,14 @@ def get_state_request_parser():
     parser = get_base_parser()
     parser.add_argument('device_uid', required=True, location='json', type=non_empty_string)
     parser.add_argument('screenshot', required=True, location='json', type=non_empty_string)
+
+    return parser.copy()
+
+
+def get_state_file_request_parser():
+    parser = get_base_parser()
+    parser.add_argument('device_uid', required=True, location='args', type=non_empty_string)
+    parser.add_argument('screenshot', required=True, location='files', type=werkzeug.datastructures.FileStorage)
 
     return parser.copy()
 
