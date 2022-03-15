@@ -14,6 +14,7 @@ from exceptions.base import StateNotFound, StateNotFoundForDevice, DeviceNotFoun
 
 ns = Namespace('State', description='Handle state')
 req_parser = req_parser_helper.get_state_request_parser()
+file_req_parser = req_parser_helper.get_state_file_request_parser()
 id_parser = req_parser_helper.get_id_parser()
 uid_parser = req_parser_helper.get_uid_parser()
 state_parser = req_parser_helper.get_state_filter_parser()
@@ -40,6 +41,29 @@ class State(Resource):
 
         try:
             state = state_service.create_or_update(**req_data)
+            matcher_helper.match_state(state)
+        except DeviceNotFound as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Device with uid '{err.uid}' was not found")
+
+        return {"state": state.to_dict()}, HTTPStatus.OK
+
+    @ns.doc('Create/Update state with file')
+    @ns.expect(file_req_parser)
+    @ns.response(HTTPStatus.OK, 'Success')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Input Validation Error')
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'Unprocessable entity')
+    def post(self):
+        args = file_req_parser.parse_args()
+
+        req_data = {
+            'device_uid': args.get('device_uid'),
+            'screenshot': args.get('screenshot')
+        }
+
+        app.logger.debug(f"Got state update request - {logging_helper.dict_to_log_string(req_data)}")
+
+        try:
+            state = state_service.create_or_update_from_file(**req_data)
             matcher_helper.match_state(state)
         except DeviceNotFound as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Device with uid '{err.uid}' was not found")
