@@ -34,7 +34,8 @@ class State(Resource):
 
         req_data = {
             'device_uid': args.get('device_uid'),
-            'screenshot': args.get('screenshot')
+            'screenshot': args.get('screenshot'),
+            'resolved': args.get('resolved')
         }
 
         app.logger.debug(f"Got state update request - {logging_helper.dict_to_log_string(req_data)}")
@@ -57,7 +58,8 @@ class State(Resource):
 
         req_data = {
             'device_uid': args.get('device_uid'),
-            'screenshot': args.get('screenshot')
+            'screenshot': args.get('screenshot'),
+            'resolved': args.get('resolved')
         }
 
         app.logger.debug(f"Got state update request - {logging_helper.dict_to_log_string(req_data)}")
