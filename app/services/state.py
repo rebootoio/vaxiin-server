@@ -107,19 +107,19 @@ def _filter_by_regex(state_list, regex):
     return matched_state_list
 
 
-def create_or_update(*, device_uid, screenshot):
+def create_or_update(*, device_uid, screenshot, resolved):
     decoded_screenshot = base64.b64decode(screenshot.encode('ascii'))
     ocr_text = pytesseract.image_to_string(Image.open(io.BytesIO(decoded_screenshot)))
-    return _create_or_update(device_uid=device_uid, screenshot=decoded_screenshot, ocr_text=ocr_text)
+    return _create_or_update(device_uid=device_uid, screenshot=decoded_screenshot, resolved=resolved, ocr_text=ocr_text)
 
 
-def create_or_update_from_file(*, device_uid, screenshot):
+def create_or_update_from_file(*, device_uid, screenshot, resolved):
     screenshot_to_save = screenshot.read()
     ocr_text = pytesseract.image_to_string(Image.open(screenshot))
-    return _create_or_update(device_uid=device_uid, screenshot=screenshot_to_save, ocr_text=ocr_text)
+    return _create_or_update(device_uid=device_uid, screenshot=screenshot_to_save, resolved=resolved, ocr_text=ocr_text)
 
 
-def _create_or_update(*, device_uid, screenshot, ocr_text):
+def _create_or_update(*, device_uid, screenshot, ocr_text, resolved):
     # TODO - handle and throw DeviceNotFound Error
     try:
         state = get_open_by_device(device_uid)
@@ -128,13 +128,16 @@ def _create_or_update(*, device_uid, screenshot, ocr_text):
         state = State(
             screenshot=screenshot,
             ocr_text=ocr_text,
-            device_uid=device_uid
+            device_uid=device_uid,
+            resolved=resolved
         )
         app.session.add(state)
 
     else:
         state.screenshot = screenshot
         state.ocr_text = ocr_text
+        if resolved is not None:
+            state.resolved = resolved
 
     app.session.commit()
     return state

@@ -90,6 +90,7 @@ def get_state_request_parser():
     parser = get_base_parser()
     parser.add_argument('device_uid', required=True, location='json', type=non_empty_string)
     parser.add_argument('screenshot', required=True, location='json', type=non_empty_string)
+    parser.add_argument('resolved', required=False, location='json', type=bool)
 
     return parser.copy()
 
@@ -97,6 +98,7 @@ def get_state_request_parser():
 def get_state_file_request_parser():
     parser = get_base_parser()
     parser.add_argument('device_uid', required=True, location='args', type=non_empty_string)
+    parser.add_argument('resolved', required=False, location='args', type=bool)
     parser.add_argument('screenshot', required=True, location='files', type=werkzeug.datastructures.FileStorage)
 
     return parser.copy()
