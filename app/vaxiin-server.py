@@ -20,6 +20,7 @@ from routes.state_screenshot import ns as state_screenshot_ns
 from routes.work import ns as work_ns
 from routes.execution import ns as execution_ns
 from routes.heartbeat import ns as heartbeat_ns
+from routes.version import ns as version_ns
 
 from models.creds import Base as creds_base
 from models.device import Base as device_base
@@ -49,6 +50,7 @@ def create_app():
     api.add_namespace(work_ns, default_path + '/work')
     api.add_namespace(execution_ns, default_path + '/execution')
     api.add_namespace(heartbeat_ns, default_path + '/heartbeat')
+    api.add_namespace(version_ns, '/version')
 
     @app.teardown_appcontext
     def remove_session(*args, **kwargs):
