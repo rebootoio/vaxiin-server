@@ -19,6 +19,9 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
 
+    - name: Update version number
+      run: sed -i 's?DEV-VERSION-0.0?${{ github.ref_name }}?' app/version.py
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
 
