@@ -62,7 +62,7 @@ class Action(Resource):
         try:
             action = action_service.update(**req_data)
         except ActionNotFound as err:
-            abort(HTTPStatus.BAD_REQUEST, f"Action with name '{err.name}' was not found")
+            abort(HTTPStatus.NOT_FOUND, f"Action with name '{err.name}' was not found")
 
         return {"action": action.to_dict()}, HTTPStatus.OK
 
@@ -86,7 +86,7 @@ class Action(Resource):
         except ActionNotFound as err:
             abort(HTTPStatus.NOT_FOUND, f"Action with name '{err.name}' was not found")
         except ActionInUse as err:
-            abort(HTTPStatus.NOT_FOUND, f"Action with name '{err.name}' was found in rules '{', '.join(err.rules)}'")
+            abort(HTTPStatus.CONFLICT, f"Action with name '{err.name}' was found in rules '{', '.join(err.rules)}'")
 
         return action.to_dict(), HTTPStatus.OK
 

@@ -49,8 +49,8 @@ class Work(Resource):
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Action with name '{err.name}' was not found")
         except RuleNameNotFound as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Rule with name '{err.name}' was not found")
-        except ManualWorkMustHaveRuleOrActions as err:
-            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Either 'rule' or 'actions' must be set for work")
+        except ManualWorkMustHaveRuleOrActions:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, "Either 'rule' or 'actions' must be set for work")
 
         return {"work": work.to_dict()}, HTTPStatus.OK
 
@@ -114,7 +114,7 @@ class WorkById(Resource):
         except WorkIsNotPending as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Work with id '{err.id}' is not pending")
 
-        return {"work": [work.to_dict()]}, HTTPStatus.OK
+        return {"work": work.to_dict()}, HTTPStatus.OK
 
 
 @ns.route('/by-device')

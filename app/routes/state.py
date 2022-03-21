@@ -9,7 +9,7 @@ import helpers.req_parser as req_parser_helper
 
 import services.state as state_service
 
-from exceptions.base import StateNotFound, StateNotFoundForDevice, DeviceNotFound
+from exceptions.base import StateNotFound, StateNotFoundForDevice
 
 
 ns = Namespace('State', description='Handle state')
@@ -40,11 +40,8 @@ class State(Resource):
 
         app.logger.debug(f"Got state update request - {logging_helper.dict_to_log_string(req_data)}")
 
-        try:
-            state = state_service.create_or_update(**req_data)
-            matcher_helper.match_state(state)
-        except DeviceNotFound as err:
-            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Device with uid '{err.uid}' was not found")
+        state = state_service.create_or_update(**req_data)
+        matcher_helper.match_state(state)
 
         return {"state": state.to_dict()}, HTTPStatus.OK
 
@@ -64,11 +61,8 @@ class State(Resource):
 
         app.logger.debug(f"Got state update request - {logging_helper.dict_to_log_string(req_data)}")
 
-        try:
-            state = state_service.create_or_update_from_file(**req_data)
-            matcher_helper.match_state(state)
-        except DeviceNotFound as err:
-            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Device with uid '{err.uid}' was not found")
+        state = state_service.create_or_update_from_file(**req_data)
+        matcher_helper.match_state(state)
 
         return {"state": state.to_dict()}, HTTPStatus.OK
 
@@ -123,7 +117,7 @@ class ResolveStateByDevice(Resource):
 class UpdateResolveState(Resource):
 
     @ns.doc('update state resolution')
-    @ns.expect(uid_parser)
+    @ns.expect(state_resolved_parser)
     @ns.response(HTTPStatus.OK, 'Success')
     @ns.response(HTTPStatus.BAD_REQUEST, 'Input Validation Error')
     @ns.response(HTTPStatus.NOT_FOUND, 'State not found')

@@ -1,0 +1,23 @@
+FROM python:3.9-buster
+
+RUN echo 'deb https://notesalexp.org/tesseract-ocr-dev/buster/ buster main' >> /etc/apt/sources.list \
+  && wget -O - https://notesalexp.org/debian/alexp_key.asc | apt-key add
+
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY test-requirements.txt /requirements.txt
+
+RUN pip3 install -r requirements.txt
+
+RUN mkdir /work_dir
+
+COPY app/ /work_dir/app
+
+COPY tests/ /work_dir/tests
+
+WORKDIR /work_dir
+
+ENTRYPOINT [ "python3" ]
+
+CMD [ "-m", "pytest", "--disable-warnings"]

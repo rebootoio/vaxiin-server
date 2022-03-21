@@ -98,8 +98,8 @@ def match_open_states(a_app):
         open_state_list = state_service.get_open()
 
         for state in open_state_list:
-            if (state.matched_rule is not None and
-                    all([work.status != 'PENDING' and ((current_time - work.last_updated).total_seconds() / 60 > app.config.get('retry_rule_interval')) for work in state.works])):
+            if (state.matched_rule is not None and all(
+                    [work.status != 'PENDING' and ((current_time - work.last_updated).total_seconds() / 60 > app.config.get('retry_rule_interval')) for work in state.works])):
                 matching_rule = rule_service.get_by_name(state.matched_rule)
                 work_data_list.append(
                     parse_work(

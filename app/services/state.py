@@ -139,5 +139,6 @@ def _create_or_update(*, device_uid, screenshot, ocr_text, resolved):
         if resolved is not None:
             state.resolved = resolved
 
+    app.logger.debug(f"Updating state in DB '{state}'...")
     app.session.commit()
     return state

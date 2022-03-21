@@ -77,7 +77,7 @@ def heartbeat(**kwargs):
             try:
                 creds_service.get_by_name(creds_name)
             except CredsNameNotFound:
-                app.logger.warn(f"Got heartbeat from uid '{kwargs['uid']}' with invalid cred name '{creds_name}', omitting it")
+                app.logger.warning(f"Got heartbeat from uid '{kwargs['uid']}' with invalid cred name '{creds_name}', omitting it")
                 kwargs.pop('creds_name')
                 invalid_creds = True
 

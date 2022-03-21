@@ -8,7 +8,12 @@ run:        ## Run application
 
 test:        ## test application
 	. ./venv/bin/activate && \
+	pip install -r test-requirements.txt && \
 	python -m pytest --disable-warnings
+
+test_docker:        ## test application in docker
+	docker build -f Dockerfile.tests --tag vaxiin-server-tests . && \
+	docker run --rm vaxiin-server-tests
 
 build:      ## build application
 	docker build -t vaxiin-server .

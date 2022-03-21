@@ -34,13 +34,6 @@ def get_uid_parser():
     return parser.copy()
 
 
-def get_regex_parser():
-    parser = get_base_parser()
-    parser.add_argument('regex', required=True, location='args', type=non_empty_string)
-
-    return parser.copy()
-
-
 def get_work_complete_parser():
     parser = get_base_parser()
     parser.add_argument('work_id', required=True, location='json', type=int)
@@ -53,7 +46,7 @@ def get_action_request_parser():
     parser = get_base_parser()
     parser.add_argument('name', required=True, location='json', type=str)
     parser.add_argument('action_type', required=True, location='json', type=non_empty_string, choices=('keystroke', 'ipmitool', 'power', 'sleep'))
-    parser.add_argument('action_data', required=True, location='json')
+    parser.add_argument('action_data', required=True, location='json', type=non_empty_string)
 
     return parser.copy()
 
