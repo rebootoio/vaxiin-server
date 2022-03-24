@@ -11,6 +11,16 @@ def test_action_create_endpoint_expect_success(client, headers, test_data):
     assert new_action['action_data'] == test_data['action']['action_data']
 
 
+def test_action_with_params_create_endpoint_expect_success(client, headers, test_data):
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action_with_params'])
+    assert response.status_code == 200
+
+    new_action = response.json['action']
+    assert new_action['name'] == test_data['action_with_params']['name']
+    assert new_action['action_type'] == test_data['action_with_params']['action_type']
+    assert new_action['action_data'] == test_data['action_with_params']['action_data']
+
+
 def test_action_create_endpoint_expect_already_exist(client, headers, test_data):
     client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
@@ -25,6 +35,27 @@ def test_action_create_endpoint_with_empty_data_expect_failure(client, headers, 
     assert response.json['errors']['action_data'] == "Must not be empty string"
 
 
+def test_action_create_endpoint_expect_param_key_error(client, headers, test_data):
+    test_data['action']['action_data'] = "{hello::there}"
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, metadata]"
+
+
+def test_action_create_endpoint_expect_device_param_value_error(client, headers, test_data):
+    test_data['action']['action_data'] = "{device::me}"
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param value 'me' is invalid for 'device'. Allowed values: [uid, ipmi_ip, model]"
+
+
+def test_action_create_endpoint_expect_creds_param_value_error(client, headers, test_data):
+    test_data['action']['action_data'] = "{cred::me}"
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param value 'me' is invalid for 'cred'. Allowed values: [username, password]"
+
+
 def test_action_update_endpoint_expect_success(client, headers, test_data):
     client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     new_action_data = "raw 13"
@@ -35,6 +66,41 @@ def test_action_update_endpoint_expect_success(client, headers, test_data):
     assert new_action['name'] == test_data['action']['name']
     assert new_action['action_type'] == test_data['action']['action_type']
     assert new_action['action_data'] == new_action_data
+
+
+def test_action_with_params_update_endpoint_expect_success(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    response = client.put('/api/v1/action/', headers=headers, json={**test_data['action'], **{'action_data': test_data['action_with_params']['action_data']}})
+    assert response.status_code == 200
+
+    new_action = response.json['action']
+    assert new_action['name'] == test_data['action']['name']
+    assert new_action['action_type'] == test_data['action']['action_type']
+    assert new_action['action_data'] == test_data['action_with_params']['action_data']
+
+
+def test_action_update_endpoint_expect_param_key_error(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['action']['action_data'] = "{hello::there}"
+    response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, metadata]"
+
+
+def test_action_update_endpoint_expect_device_param_value_error(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['action']['action_data'] = "{device::me}"
+    response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param value 'me' is invalid for 'device'. Allowed values: [uid, ipmi_ip, model]"
+
+
+def test_action_update_endpoint_expect_creds_param_value_error(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['action']['action_data'] = "{cred::me}"
+    response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param value 'me' is invalid for 'cred'. Allowed values: [username, password]"
 
 
 def test_action_update_endpoint_expect_not_found(client, headers, test_data):

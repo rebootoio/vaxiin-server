@@ -11,6 +11,7 @@ def test_device_create_endpoint_expect_success(client, headers, test_data):
     assert new_device['model'] == test_data['device']['model']
     assert new_device['creds_name'] == test_data['device']['creds_name']
     assert new_device['zombie'] == test_data['device']['zombie']
+    assert new_device['metadata'] == test_data['device']['metadata']
 
 
 def test_device_create_endpoint_expect_creds_not_found(client, headers, test_data):
@@ -94,6 +95,7 @@ def test_device_get_endpoint_expect_success(client, headers, test_data):
     assert new_device['model'] == test_data['device']['model']
     assert new_device['creds_name'] == test_data['device']['creds_name']
     assert new_device['zombie'] == test_data['device']['zombie']
+    assert new_device['metadata'] == test_data['device']['metadata']
 
 
 def test_device_get_endpoint_expect_not_found(client, headers, test_data):

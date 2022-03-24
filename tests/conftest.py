@@ -67,11 +67,6 @@ def client(app):
     return app.test_client()
 
 
-# @pytest.fixture()
-# def convertor():
-#     return convertor_helper
-
-
 @pytest.fixture()
 def headers():
     return {
@@ -87,6 +82,11 @@ def test_data():
             "action_type": "ipmitool",
             "action_data": "lan print"
         },
+        "action_with_params": {
+            "name": "test action with params",
+            "action_type": "ipmitool",
+            "action_data": "{myparam} {device::model} {device::ipmi_ip} {device::uid} {cred::username} {cred::password} {metadata::hostname}"
+        },
         "creds": {
             "name": "test creds",
             "username": "user",
@@ -97,7 +97,10 @@ def test_data():
             "ipmi_ip": "10.10.2.33",
             "model": "idrac9",
             "zombie": False,
-            "creds_name": "test creds"
+            "creds_name": "test creds",
+            "metadata": {
+                "hostname": "test-hostname"
+            }
         },
         "heartbeat": {
             "uid": "test uid",

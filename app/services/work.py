@@ -1,3 +1,4 @@
+import re
 import datetime
 from sqlalchemy import or_
 from flask import current_app as app
@@ -5,6 +6,7 @@ from flask import current_app as app
 from models.work import Work
 import services.creds as creds_service
 import services.device as device_service
+import services.execution as execution_service
 from exceptions.base import WorkNotFound, WorkNotFoundForDevice, WorkIsNotPending
 
 
@@ -63,6 +65,11 @@ def get_assingned_and_pending():
 
 
 def get_assignment():
+    # we create a new SafeDict class to ignore missing params
+    class SafeDict(dict):
+        def __missing__(self, key):
+            return '{' + key + '}'
+
     work = app.session.query(Work).filter(Work.status == 'PENDING', Work.assigned.is_(None)).first()
     if work:
         device = device_service.get_by_uid(work.device_uid)
@@ -75,12 +82,48 @@ def get_assignment():
             app.logger.warning("Not assigning work since no credentials were found")
             return
 
+        params = SafeDict({
+            'cred': {
+                'username': creds.username,
+                'password': creds.password
+            },
+            'device': {
+                'uid': device.uid,
+                'ipmi_ip': device.ipmi_ip,
+                'model': device.model
+            },
+            'metadata': device.device_metadata
+        })
+
+        parsed_actions = []
+        for action in work.actions:
+            compiled_action_data = re.sub(r'\{([^:}]*?)::([^}]*?)\}', r'{\1[\2]}', action['data'])
+            try:
+                action['data'] = compiled_action_data.format_map(params)
+            except KeyError as err:
+                app.logger.warning(f"Marking work as failed due to unknown metadata key: {err.args[0]}")
+                execution_service.create(**{
+                    'work_id': work.work_id,
+                    'state_id': work.state_id,
+                    'trigger': work.trigger,
+                    'action_name': 'Missing metadata key',
+                    'status': 'failure',
+                    'elapsed_time': 0.0,
+                    'run_data': f"Action '{action['name']}' requires the metadata key '{err.args[0]}' but it is not defined on the device"
+                })
+                complete_by_id(
+                    work_id=work.work_id,
+                    status='failure'
+                )
+                return
+            parsed_actions.append(action)
+
         assignment = {
             'work_id': work.work_id,
             'state_id': work.state_id,
             'trigger': work.trigger,
             'requires_console': work.requires_console,
-            'action_list': work.actions,
+            'action_list': parsed_actions,
             'device_data': {
                 'uid': device.uid,
                 'ip': device.ipmi_ip,

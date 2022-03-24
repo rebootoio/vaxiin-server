@@ -10,7 +10,7 @@ import helpers.req_parser as req_parser_helper
 
 import services.action as action_service
 
-from exceptions.base import ActionAlreadyExist, ActionNotFound, ActionInUse
+from exceptions.base import ActionAlreadyExist, ActionNotFound, ActionInUse, UnknownActionParamKey, UnknownActionParamValue
 
 ns = Namespace('Action', description='Handle action')
 req_parser = req_parser_helper.get_action_request_parser()
@@ -37,9 +37,14 @@ class Action(Resource):
         app.logger.debug(f"Got action creation request - {logging_helper.dict_to_log_string(req_data)}")
 
         try:
+            validation_helper.validate_action_data_params(action_data=req_data['action_data'])
             action = action_service.create(**req_data)
         except ActionAlreadyExist as err:
             abort(HTTPStatus.CONFLICT, f"Action with name '{err.name}' already exist")
+        except UnknownActionParamKey as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param key '{err.key}' is invalid. Allowed keys: [{', '.join(validation_helper.VALID_PARAMS.keys())}]")
+        except UnknownActionParamValue as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param value '{err.value}' is invalid for '{err.key}'. Allowed values: [{', '.join(validation_helper.VALID_PARAMS[err.key])}]")
 
         return {"action": action.to_dict()}, HTTPStatus.OK
 
@@ -60,9 +65,14 @@ class Action(Resource):
         app.logger.debug(f"Got action update request - {logging_helper.dict_to_log_string(req_data)}")
 
         try:
+            validation_helper.validate_action_data_params(action_data=req_data['action_data'])
             action = action_service.update(**req_data)
         except ActionNotFound as err:
             abort(HTTPStatus.NOT_FOUND, f"Action with name '{err.name}' was not found")
+        except UnknownActionParamKey as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param key '{err.key}' is invalid. Allowed keys: [{', '.join(validation_helper.VALID_PARAMS.keys())}]")
+        except UnknownActionParamValue as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param value '{err.value}' is invalid for '{err.key}'. Allowed values: [{', '.join(validation_helper.VALID_PARAMS[err.key])}]")
 
         return {"action": action.to_dict()}, HTTPStatus.OK
 

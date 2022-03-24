@@ -53,7 +53,8 @@ class Device(Resource):
             'ipmi_ip': args.get('ipmi_ip'),
             'creds_name': args.get('creds_name'),
             'model': args.get('model'),
-            'zombie': args.get('zombie')
+            'zombie': args.get('zombie'),
+            'device_metadata': args.get('metadata')
         }
 
         app.logger.debug(f"Got create device request - {logging_helper.dict_to_log_string(req_data)}")
@@ -80,7 +81,8 @@ class Device(Resource):
             'ipmi_ip': args.get('ipmi_ip'),
             'creds_name': args.get('creds_name'),
             'model': args.get('model'),
-            'zombie': args.get('zombie')
+            'zombie': args.get('zombie'),
+            'device_metadata': args.get('metadata')
         }
 
         app.logger.debug(f"Got update device request - {logging_helper.dict_to_log_string(req_data)}")
