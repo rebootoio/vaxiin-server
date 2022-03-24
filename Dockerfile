@@ -16,4 +16,4 @@ VOLUME /db
 
 ENTRYPOINT [ "python3" ]
 
-CMD [ "/app/vaxiin-server.py" ]
+CMD [ "/app/vaxiin_server.py" ]
