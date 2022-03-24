@@ -27,12 +27,6 @@ class RuleNameNotFound(Error):
         self.message = message
 
 
-class RuleIdNotFound(Error):
-    def __init__(self, _id, message="Failed to find rule by id"):
-        self.id = _id
-        self.message = message
-
-
 class RuleAlreadyExist(Error):
     def __init__(self, name, message="A rule with the same name already exist"):
         self.name = name

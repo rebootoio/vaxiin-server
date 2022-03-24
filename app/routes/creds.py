@@ -107,6 +107,8 @@ class Creds(Resource):
         try:
             validation_helper.validate_creds_not_in_use(creds_name=req_data['name'])
             creds = creds_service.delete(req_data['name'])
+        except CredsNameNotFound as err:
+            abort(HTTPStatus.NOT_FOUND, f"Creds with name '{err.name}' was not found")
         except CredsAreSetAsDefault as err:
             abort(HTTPStatus.CONFLICT, f"Creds with name '{err.name}' are set as the default")
         except CredsInUse as err:
@@ -127,6 +129,12 @@ class AllCreds(Resource):
 
 @ns.route('/default')
 class DefaultCreds(Resource):
+
+    @ns.doc('get default creds')
+    @ns.response(HTTPStatus.OK, 'Success')
+    def get(self):
+        default_creds = creds_service.get_default()
+        return {"creds": default_creds.to_dict() if default_creds else None}, HTTPStatus.OK
 
     @ns.doc('Set creds as default')
     @ns.expect(name_parser)

@@ -61,7 +61,7 @@ class Device(Resource):
         try:
             device = device_service.create(**{k: v for k, v in req_data.items() if v is not None})
         except DeviceAlreadyExist as err:
-            abort(HTTPStatus.NOT_FOUND, f"Device with uid '{err.uid}' already exist")
+            abort(HTTPStatus.CONFLICT, f"Device with uid '{err.uid}' already exist")
         except CredsNameNotFound as err:
             abort(HTTPStatus.NOT_FOUND, f"Creds with name '{err.name}' was not found")
 
@@ -114,7 +114,7 @@ class Device(Resource):
         except DeviceNotFound as err:
             abort(HTTPStatus.NOT_FOUND, f"Device with uid '{err.uid}' was not found")
         except DeviceInUse as err:
-            abort(HTTPStatus.NOT_FOUND, f"Device with uid '{err.uid}' has an unresolved state with ID {err.state_id}")
+            abort(HTTPStatus.CONFLICT, f"Device with uid '{err.uid}' has an unresolved state with ID {err.state_id}")
 
         return device.to_dict(), HTTPStatus.OK
 

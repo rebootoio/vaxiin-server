@@ -44,7 +44,7 @@ class Rule(Resource):
         app.logger.debug(f"Got rule creation request - {logging_helper.dict_to_log_string(req_data)}")
 
         if req_data['after_rule'] is not None and req_data['before_rule'] is not None:
-            abort(HTTPStatus.CONFLICT, f"Please set either 'before_rule' OR 'after_rule'")
+            abort(HTTPStatus.CONFLICT, "Please set either 'before_rule' OR 'after_rule'")
 
         try:
             validation_helper.validate_regex(regex_string=req_data['regex'])
@@ -58,8 +58,6 @@ class Rule(Resource):
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Action with name '{err.name}' was not found")
         except StateNotFound as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"State with id '{err.id}' was not found")
-        except RuleNameNotFound as err:
-            abort(HTTPStatus.NOT_FOUND, f"Rule with name '{err.name}' was not found")
         except RegexIsInvalid as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Regex '{err.regex_string}' is invalid, error is: '{err.error}'")
 
@@ -88,7 +86,7 @@ class Rule(Resource):
         app.logger.debug(f"Got rule update request - {logging_helper.dict_to_log_string(req_data)}")
 
         if req_data['after_rule'] is not None and req_data['before_rule'] is not None:
-            abort(HTTPStatus.CONFLICT, f"Please set either 'before_rule' OR 'after_rule'")
+            abort(HTTPStatus.CONFLICT, "Please set either 'before_rule' OR 'after_rule'")
 
         try:
             if req_data.get('actions') is not None:

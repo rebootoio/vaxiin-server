@@ -1,7 +1,7 @@
 from flask import current_app as app
 
 from models.rule import Rule, RuleOrder
-from exceptions.base import RuleNameNotFound, RuleAlreadyExist, RuleIdNotFound
+from exceptions.base import RuleNameNotFound, RuleAlreadyExist
 
 
 def get_by_name(name):
@@ -9,15 +9,6 @@ def get_by_name(name):
     if rule is None:
         app.logger.debug(f"Rule not found! name: '{name}'")
         raise RuleNameNotFound(name)
-    else:
-        return rule
-
-
-def get_by_id(rule_id):
-    rule = app.session.query(Rule).get(rule_id)
-    if rule is None:
-        app.logger.debug(f"Rule not found! id: '{rule_id}'")
-        raise RuleIdNotFound(rule_id)
     else:
         return rule
 

@@ -1,0 +1,16 @@
+name: run tests
+
+on:
+  pull_request:
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: run tests in docker
+      run: make test_docker

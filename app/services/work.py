@@ -72,7 +72,7 @@ def get_assignment():
             creds = creds_service.get_by_name(device.creds_name)
 
         if creds is None:
-            app.logger.warn("Not assigning work since no credentials were found")
+            app.logger.warning("Not assigning work since no credentials were found")
             return
 
         assignment = {
@@ -98,6 +98,7 @@ def get_assignment():
 
 def create(work_data):
     work = Work(**work_data)
+    app.logger.debug(f"Creating work '{work}'...")
     app.session.add(work)
     app.session.commit()
     return work
