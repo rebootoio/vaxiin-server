@@ -35,13 +35,13 @@ def test_fail_stuck_work(app, client, headers, test_data):
     assert execution_data['run_data']['message'] == 'Got a timeout while waiting for assigned work to complete'
 
 
-def test_match_open_states(app, client, headers, test_data):
+def test_periodic_work_assignment(app, client, headers, test_data):
     client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     client.put('/api/v1/state/', headers=headers, json=test_data['state'])
     client.post('/api/v1/rule/', headers=headers, json=test_data['rule'])
-    convertor_helper.match_open_states(app)
+    convertor_helper.periodic_work_assignment(app)
     # Make sure it does not create another work
-    convertor_helper.match_open_states(app)
+    convertor_helper.periodic_work_assignment(app)
     response = client.get(f"/api/v1/work/by-device?uid={test_data['device']['uid']}")
     assert response.status_code == 200
     assert len(response.json['works']) == 1

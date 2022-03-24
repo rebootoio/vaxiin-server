@@ -43,7 +43,7 @@ def add_server_config(app):
     app.config['port'] = server_config.get('port', 5000)
     app.config['db_path'] = server_config.get('db_path', '/db')
     app.config['automatic_recovery'] = server_config.get('automatic_recovery', False)
-    app.config['match_open_states_interval'] = server_config.get('match_open_states_interval', 300)
+    app.config['periodic_work_assignment_interval'] = server_config.get('periodic_work_assignment_interval', 300)
     app.config['get_zombie_screenshot_interval'] = server_config.get('get_zombie_screenshot_interval', 300)
     app.config['retry_rule_interval'] = server_config.get('retry_rule_interval', 60)
     app.config['update_state_interval'] = server_config.get('update_state_interval', 60)

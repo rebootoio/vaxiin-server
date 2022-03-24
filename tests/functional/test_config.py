@@ -6,7 +6,7 @@ def test_config_default_values(app):
     assert app.config['port'] == 5000
     assert app.config['db_path'] == '/db'
     assert app.config['automatic_recovery'] is False
-    assert app.config['match_open_states_interval'] == 300
+    assert app.config['periodic_work_assignment_interval'] == 300
     assert app.config['get_zombie_screenshot_interval'] == 300
     assert app.config['retry_rule_interval'] == 60
     assert app.config['update_state_interval'] == 60
@@ -22,7 +22,7 @@ def test_config_values_from_yaml(app):
     assert app.config['port'] == 5000
     assert app.config['db_path'] == './'
     assert app.config['automatic_recovery'] is True
-    assert app.config['match_open_states_interval'] == 3
+    assert app.config['periodic_work_assignment_interval'] == 3
     assert app.config['get_zombie_screenshot_interval'] == 3
     assert app.config['retry_rule_interval'] == 10
     assert app.config['update_state_interval'] == 10

@@ -26,7 +26,7 @@ def create_config(config_file_path):
         'host': '127.0.0.1',
         'db_path': './',
         'automatic_recovery': True,
-        'match_open_states_interval': 3,
+        'periodic_work_assignment_interval': 3,
         'get_zombie_screenshot_interval': 3,
         'retry_rule_interval': 10,
         'update_state_interval': 10,

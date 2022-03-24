@@ -70,10 +70,10 @@ def create_scheduler(app):
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         sched = BackgroundScheduler()
         sched.add_job(
-            func=convertor_helper.match_open_states,
+            func=convertor_helper.periodic_work_assignment,
             args=[app],
             trigger="interval",
-            minutes=app.config.get('match_open_states_interval'),
+            minutes=app.config.get('periodic_work_assignment_interval'),
             next_run_time=(datetime.now() + timedelta(seconds=20))
         )
         sched.add_job(
