@@ -45,7 +45,7 @@ def get_work_complete_parser():
 def get_action_request_parser():
     parser = get_base_parser()
     parser.add_argument('name', required=True, location='json', type=str)
-    parser.add_argument('action_type', required=True, location='json', type=non_empty_string, choices=('keystroke', 'ipmitool', 'power', 'sleep'))
+    parser.add_argument('action_type', required=True, location='json', type=non_empty_string, choices=('keystroke', 'ipmitool', 'power', 'sleep', 'request'))
     parser.add_argument('action_data', required=True, location='json', type=non_empty_string)
 
     return parser.copy()

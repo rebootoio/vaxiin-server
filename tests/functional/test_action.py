@@ -171,7 +171,7 @@ def test_action_list_types_endpoint_expect_success(client):
     assert response.status_code == 200
 
     action_type_list = response.json['action_types']
-    assert action_type_list == ['keystroke', 'ipmitool', 'power', 'sleep']
+    assert action_type_list == ['keystroke', 'ipmitool', 'power', 'sleep', 'request']
 
 
 def test_action_list_power_options_endpoint_expect_success(client):
