@@ -9,6 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from config import configure_app, configure_logging
 import helpers.db as db_helper
+import helpers.handler as handler_helper
 import helpers.convertor as convertor_helper
 
 from routes.creds import ns as creds_ns
@@ -69,20 +70,21 @@ def create_scheduler(app):
     # Make sure we run just once in debug mode
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         sched = BackgroundScheduler()
-        sched.add_job(
-            func=convertor_helper.periodic_work_assignment,
-            args=[app],
-            trigger="interval",
-            minutes=app.config.get('periodic_work_assignment_interval'),
-            next_run_time=(datetime.now() + timedelta(seconds=20))
-        )
-        sched.add_job(
-            func=convertor_helper.get_zombie_screenshots,
-            args=[app],
-            trigger="interval",
-            minutes=app.config.get('get_zombie_screenshot_interval'),
-            next_run_time=(datetime.now() + timedelta(seconds=30))
-        )
+        if app.config.get('automatic_recovery'):
+            sched.add_job(
+                func=convertor_helper.periodic_work_assignment,
+                args=[app],
+                trigger="interval",
+                minutes=app.config.get('periodic_work_assignment_interval'),
+                next_run_time=(datetime.now() + timedelta(seconds=20))
+            )
+            sched.add_job(
+                func=convertor_helper.get_zombie_screenshots,
+                args=[app],
+                trigger="interval",
+                minutes=app.config.get('get_zombie_screenshot_interval'),
+                next_run_time=(datetime.now() + timedelta(seconds=30))
+            )
         sched.add_job(
             func=convertor_helper.fail_stuck_work,
             args=[app],
@@ -96,6 +98,13 @@ def create_scheduler(app):
             trigger="interval",
             minutes=app.config.get('mark_zombie_interval'),
             next_run_time=(datetime.now() + timedelta(seconds=90))
+        )
+        sched.add_job(
+            handler_helper.get_work_assignment,
+            args=[app],
+            trigger="interval",
+            seconds=app.config.get('check_work_interval'),
+            max_instances=app.config.get('max_parallel_work')
         )
         sched.start()
 
@@ -123,8 +132,7 @@ if __name__ == '__main__':
     configure_logging()
     app = create_app()
     configure_app(app)
-    if app.config.get('automatic_recovery'):
-        create_scheduler(app)
+    create_scheduler(app)
     engine, session = db_helper.get_db(app.config['db_path'])
     create_db(app, engine, session)
     app.run(
