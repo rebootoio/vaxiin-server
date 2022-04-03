@@ -51,6 +51,9 @@ def add_server_config(app):
     app.config['pending_work_timeout'] = server_config.get('pending_work_timeout', 30)
     app.config['become_zombie_interval'] = server_config.get('become_zombie_interval', 120)
     app.config['mark_zombie_interval'] = server_config.get('mark_zombie_interval', 10)
+    app.config['check_work_interval'] = server_config.get('check_work_interval', 1)
+    app.config['max_parallel_work'] = server_config.get('max_parallel_work', 3)
+    app.config['pause_between_keys'] = server_config.get('pause_between_keys', 5)
 
 
 def configure_logging():
