@@ -91,7 +91,7 @@ def fail_stuck_work(a_app):
                 work_service.complete_by_id(work_id=work.work_id, status="failure")
 
 
-def match_open_states(a_app):
+def periodic_work_assignment(a_app):
     with a_app.app_context():
         current_time = datetime.datetime.now()
         work_data_list = []
