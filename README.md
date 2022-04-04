@@ -31,7 +31,7 @@
 - vendor-agnostic automation
 
 ## Quick Start Guide
-To get started quickly with all of the components, follow the guide at the [sandbox repository](https://github.com/rebootoio/vaxiin-sandbox)
+To view a demo and get started quickly, follow the guide at the [sandbox repository](https://github.com/rebootoio/vaxiin-sandbox)
 
 
 ## Components
