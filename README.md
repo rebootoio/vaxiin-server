@@ -28,6 +28,7 @@
 - failure detection
 - remote state extraction
 - human and machine recovery emulation
+- vendor-agnostic automation
 
 ## Quick Start Guide
 To get started quickly with all of the components, follow the guide at the [sandbox repository](https://github.com/rebootoio/vaxiin-sandbox)
