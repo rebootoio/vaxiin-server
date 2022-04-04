@@ -1,6 +1,7 @@
 import re
 import time
 import base64
+import requests
 import subprocess
 from flask import current_app as app
 from selenium.webdriver import ActionChains
@@ -8,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from subprocess import PIPE, CalledProcessError, TimeoutExpired
 
 import services.state as state_service
-from exceptions.handler import ActionError, GetScreenshotError, SendScreenshotError, IpmitoolError, SleepError, KeystrokeError
+from exceptions.handler import ActionError, GetScreenshotError, SendScreenshotError, IpmitoolError, SleepError, KeystrokeError, HttpRequestError
 
 
 model_to_interface_mapping = {
@@ -25,7 +26,8 @@ def run_action(*, action_type, action_data, device_data, browser):
         'ipmitool': run_ipmitool_action,
         'power': run_power_action,
         'screenshot': run_screenshot_action,
-        'sleep': run_sleep_action
+        'sleep': run_sleep_action,
+        'request': run_request_action
     }
     try:
         action_run_data = action_type_to_func_mapping[action_type](
@@ -38,9 +40,32 @@ def run_action(*, action_type, action_data, device_data, browser):
         return 'failure', err.error
     except Exception as err:
         app.logger.error(f"Failed at run action - action_type: '{action_type}', action_data: '{action_data}', error: '{err}'")
-        return 'failure', str(err)
+        return 'failure', {'error': f"{err}"}
     else:
         return 'success', action_run_data
+
+
+def run_request_action(*, action, device, browser):
+    try:
+        res = requests.get(action)
+        res.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        app.logger.error(f"Recieved HTTP error: {err}")
+        raise HttpRequestError({"error": "HTTP Error", "status_code": res.status_code, "response": res.text})
+    except requests.exceptions.ConnectionError as err:
+        app.logger.error(f"Recieved Connection error: {err}")
+        raise HttpRequestError({"error": "Connection Error", "message": f"{err}"})
+    except requests.exceptions.Timeout as err:
+        app.logger.error(f"Recieved Timeout error: {err}")
+        raise HttpRequestError({"error": "Timeout Error", "message": f"{err}"})
+    except requests.exceptions.RequestException as err:
+        app.logger.error(f"Recieved Request error: {err}")
+        raise HttpRequestError({"error": "Request Error", "message": f"{err}"})
+
+    return {
+        'status_code': res.status_code,
+        'response': res.text
+    }
 
 
 def run_sleep_action(*, action, device, browser):
