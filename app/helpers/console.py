@@ -132,8 +132,15 @@ def open_console_for_ilo5(*, ip, username, password, browser):
         raise OpenConsoleError("Failed to get new console window after 60s")
 
     browser.switch_to.window(browser.window_handles[1])
-    browser.maximize_window()
 
+    try:
+        WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, "//button[contains(text(), 'Acquire')]")))
+    except TimeoutException:
+        pass
+    else:
+        raise OpenConsoleError("Console session already opened by someone else")
+
+    browser.maximize_window()
     time.sleep(5)
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
@@ -187,13 +194,14 @@ def open_console_for_ilo4(*, ip, username, password, browser):
     browser.find_element_by_xpath("//span[@id='html5_irc_label']/a").click()
 
     browser.switch_to.default_content()
+    browser.switch_to.frame(browser.find_element_by_name('appFrame'))
 
     try:
-        WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "appFrame")))
+        WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, "//button[contains(text(), 'Acquire')]")))
     except TimeoutException:
-        raise OpenConsoleError("Failed to see app main frame in IRC element after 30s")
-
-    browser.switch_to.frame(browser.find_element_by_id('appFrame'))
+        pass
+    else:
+        raise OpenConsoleError("Console session already opened by someone else")
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.XPATH, "//div[@langkey='IRC.label.maximize']")))
