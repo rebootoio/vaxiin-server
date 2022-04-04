@@ -70,7 +70,7 @@ def create_scheduler(app):
     # Make sure we run just once in debug mode
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         sched = BackgroundScheduler()
-        if app.config.get('automatic_recovery'):
+        if app.config.get('run_rules'):
             sched.add_job(
                 func=convertor_helper.periodic_work_assignment,
                 args=[app],
@@ -78,6 +78,7 @@ def create_scheduler(app):
                 minutes=app.config.get('periodic_work_assignment_interval'),
                 next_run_time=(datetime.now() + timedelta(seconds=20))
             )
+        if app.config.get('get_states'):
             sched.add_job(
                 func=convertor_helper.get_zombie_screenshots,
                 args=[app],
