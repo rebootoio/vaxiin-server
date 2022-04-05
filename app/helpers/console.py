@@ -34,15 +34,31 @@ def open_console(*, uid, ip, username, password, model):
         )
     except WebDriverException as err:
         browser.quit()
+        app.logger.error(f"WebDriverException caught while trying to open console: {err}")
         raise OpenConsoleError(err.msg)
     except Exception as err:
         browser.quit()
+        app.logger.error(f"Exception caught while trying to open console: {err}")
         raise OpenConsoleError(str(err))
 
     return browser
 
 
-def close_console(*, browser):
+def close_console(*, browser, model):
+    model_to_func_mapping = {
+        'ilo5': logout_for_ilo5,
+        'ilo4': logout_for_ilo4,
+        'x10': logout_for_x10
+    }
+    if model.lower() in model_to_func_mapping:
+        app.logger.debug(f"logging out")
+        try:
+            model_to_func_mapping[model.lower()](
+                browser=browser
+            )
+        except Exception as err:
+            app.logger.error(f"Exception caught while trying to logout: {err}")
+
     app.logger.debug(f"Closing conosle to device")
     browser.quit()
 
@@ -296,3 +312,36 @@ def open_console_for_x10(*, ip, username, password, browser):
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
     time.sleep(10)
+
+
+def logout_for_ilo5(*, browser):
+    _close_additional_windows(browser=browser)
+    browser.switch_to.window(browser.window_handles[0])
+    browser.switch_to.default_content()
+    browser.switch_to.frame(browser.find_element_by_name('appFrame'))
+    browser.find_element_by_id('userlink').click()
+    browser.find_element_by_id('user_logout').click()
+
+
+def logout_for_ilo4(*, browser):
+    browser.find_element_by_xpath("//div[@langkey='IRC.label.restore']").click()
+    browser.switch_to.default_content()
+    browser.switch_to.frame(browser.find_element_by_name('appFrame'))
+    browser.switch_to.frame(browser.find_element_by_name('headerFrame'))
+    browser.find_element_by_id('logout_button').click()
+
+
+def logout_for_x10(*, browser):
+    _close_additional_windows(browser=browser)
+    browser.switch_to.window(browser.window_handles[0])
+    browser.switch_to.default_content()
+    browser.switch_to.frame(browser.find_element_by_id("TOPMENU"))
+    browser.find_element_by_link_text('Logout').click()
+
+
+def _close_additional_windows(*, browser):
+    open_windows_count = len(browser.window_handles)
+    if open_windows_count > 1:
+        for i in range(1, open_windows_count):
+            browser.switch_to.window(browser.window_handles[i])
+            browser.close()

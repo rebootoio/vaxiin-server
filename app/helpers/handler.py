@@ -73,7 +73,8 @@ def run_work_assignment(*, work_id, state_id, trigger, requires_console, device_
 
     if requires_console:
         console_helper.close_console(
-            browser=browser
+            browser=browser,
+            model=device_data['model']
         )
 
     work_service.complete_by_id(
