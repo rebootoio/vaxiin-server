@@ -125,6 +125,7 @@ def get_device_parser():
     parser.add_argument('model', required=True, location='json', type=non_empty_string)
     parser.add_argument('creds_name', required=False, location='json', type=str)
     parser.add_argument('zombie', required=False, location='json', type=bool)
+    parser.add_argument('metadata', required=False, location='json', type=dict)
 
     return parser.copy()
 

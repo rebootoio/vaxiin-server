@@ -98,6 +98,56 @@ def test_work_assign_endpoint_expect_success(client, headers, test_data):
     assert assignment['device_data']['password'] == test_data['creds']['password']
 
 
+def test_work_assign_endpoint_with_params_expect_success(client, headers, test_data):
+    client.post('/api/v1/creds/', headers=headers, json=test_data['creds'])
+    client.post('/api/v1/device/', headers=headers, json=test_data['device'])
+    client.post('/api/v1/action/', headers=headers, json=test_data['action_with_params'])
+    test_data['work'].pop('rule')
+    test_data['work']['actions'] = [test_data['action_with_params']['name']]
+    client.post('/api/v1/work/', headers=headers, json=test_data['work'])
+    response = client.post('/api/v1/work/assign')
+    assert response.status_code == 200
+
+    assignment = response.json['assignment']
+    assert assignment['work_id'] == test_data['work']['work_id']
+    assert assignment['state_id'] is None
+    assert assignment['trigger'] == f"Manual - Actions: {test_data['action_with_params']['name']}"
+    assert assignment['action_list'][0]['name'] == test_data['action_with_params']['name']
+    assert assignment['action_list'][0]['type'] == test_data['action_with_params']['action_type']
+    device_data = test_data['device']
+    creds_data = test_data['creds']
+    assert assignment['action_list'][0]['data'] == "{myparam} " + f"{device_data['model']} {device_data['ipmi_ip']} {device_data['uid']} {creds_data['username']} {creds_data['password']} {device_data['metadata']['hostname']}"
+    assert assignment['device_data']['uid'] == test_data['device']['uid']
+    assert assignment['device_data']['ip'] == test_data['device']['ipmi_ip']
+    assert assignment['device_data']['model'] == test_data['device']['model']
+    assert assignment['device_data']['username'] == test_data['creds']['username']
+    assert assignment['device_data']['password'] == test_data['creds']['password']
+
+
+def test_work_assign_endpoint_with_missing_metadata_expect_work_failure(client, headers, test_data):
+    client.post('/api/v1/creds/', headers=headers, json=test_data['creds'])
+    client.post('/api/v1/device/', headers=headers, json={**test_data['device'], **{'metadata': {}}})
+    client.post('/api/v1/action/', headers=headers, json=test_data['action_with_params'])
+    test_data['work'].pop('rule')
+    test_data['work']['actions'] = [test_data['action_with_params']['name']]
+    client.post('/api/v1/work/', headers=headers, json=test_data['work'])
+    response = client.post('/api/v1/work/assign')
+    assert response.status_code == 200
+    assert response.json['assignment'] is None
+
+    response = client.get(f"/api/v1/work/by-id?id={test_data['work']['work_id']}")
+    assert response.status_code == 200
+    assert response.json['works'][0]['status'] == "failure"
+
+    response = client.get(f"/api/v1/execution/all/by-work-id?id={test_data['work']['work_id']}")
+    assert response.status_code == 200
+
+    execution_data = response.json['executions'][0]
+    assert execution_data['action_name'] == "Missing metadata key"
+    assert execution_data['status'] == "failure"
+    assert execution_data['run_data'] == f"Action '{test_data['action_with_params']['name']}' requires the metadata key '{list(test_data['device']['metadata'].keys())[0]}' but it is not defined on the device"
+
+
 def test_work_assign_endpoint_expect_null(client):
     response = client.post('/api/v1/work/assign')
     assert response.status_code == 200

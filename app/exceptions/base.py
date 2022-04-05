@@ -129,3 +129,16 @@ class CredsNameIsReserved(Error):
     def __init__(self, name, message="The name provided for the credntials is reserved"):
         self.name = name
         self.message = message
+
+
+class UnknownActionParamKey(Error):
+    def __init__(self, key, message="The action param key is unknown"):
+        self.key = key
+        self.message = message
+
+
+class UnknownActionParamValue(Error):
+    def __init__(self, key, value, message="The action param value is unknown"):
+        self.key = key
+        self.value = value
+        self.message = message
