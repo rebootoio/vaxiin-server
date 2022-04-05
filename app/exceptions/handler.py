@@ -38,6 +38,12 @@ class IpmitoolError(ActionError):
         self.message = message
 
 
+class HttpRequestError(ActionError):
+    def __init__(self, error, message="Failed to do a GET request"):
+        self.error = error
+        self.message = message
+
+
 class ConsoleError(Error):
     def __init__(self, error, message="Failed to open console"):
         self.error = error

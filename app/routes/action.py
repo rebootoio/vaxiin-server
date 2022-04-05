@@ -138,7 +138,7 @@ class ActionTypes(Resource):
     @ns.doc('Get all actions types')
     @ns.response(HTTPStatus.OK, 'Success')
     def get(self):
-        action_type_list = ['keystroke', 'ipmitool', 'power', 'sleep']
+        action_type_list = ['keystroke', 'ipmitool', 'power', 'sleep', 'request']
         return {"action_types": action_type_list}, HTTPStatus.OK
 
 
