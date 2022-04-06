@@ -4,8 +4,8 @@ from flask import current_app as app
 import services.work as work_service
 import services.execution as execution_service
 
-import helpers.console as console_helper
-import helpers.action_runner as action_runner
+import handler.console as console_helper
+import handler.action_runner as action_runner
 
 from exceptions.handler import ConsoleError
 

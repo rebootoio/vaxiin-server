@@ -99,7 +99,7 @@ def open_console_for_idrac9(*, ip, username, password, browser):
     time.sleep(5)
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
-    time.sleep(10)
+    time.sleep(5)
 
 
 def open_console_for_ilo5(*, ip, username, password, browser):
@@ -160,7 +160,7 @@ def open_console_for_ilo5(*, ip, username, password, browser):
     time.sleep(5)
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
-    time.sleep(10)
+    time.sleep(5)
 
 
 def open_console_for_ilo4(*, ip, username, password, browser):
@@ -231,7 +231,7 @@ def open_console_for_ilo4(*, ip, username, password, browser):
     time.sleep(5)
     body = browser.find_element_by_id('rc_video')
     body.send_keys(Keys.SHIFT)
-    time.sleep(10)
+    time.sleep(5)
 
 
 def open_console_for_x10(*, ip, username, password, browser):
@@ -311,7 +311,7 @@ def open_console_for_x10(*, ip, username, password, browser):
     time.sleep(5)
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
-    time.sleep(10)
+    time.sleep(5)
 
 
 def logout_for_ilo5(*, browser):

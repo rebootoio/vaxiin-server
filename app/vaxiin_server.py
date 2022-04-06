@@ -9,8 +9,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from config import configure_app, configure_logging
 import helpers.db as db_helper
-import helpers.handler as handler_helper
 import helpers.convertor as convertor_helper
+
+import handler.work as work_handler
 
 from routes.creds import ns as creds_ns
 from routes.device import ns as device_ns
@@ -101,7 +102,7 @@ def create_scheduler(app):
             next_run_time=(datetime.now() + timedelta(seconds=90))
         )
         sched.add_job(
-            handler_helper.get_work_assignment,
+            work_handler.get_work_assignment,
             args=[app],
             trigger="interval",
             seconds=app.config.get('check_work_interval'),

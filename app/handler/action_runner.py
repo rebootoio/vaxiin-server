@@ -70,6 +70,7 @@ def run_request_action(*, action, device, browser):
 
 def run_sleep_action(*, action, device, browser):
     try:
+        app.logger.debug(f"Sleeping for {action} seconds")
         time.sleep(int(action))
     except ValueError:
         raise SleepError({
@@ -125,6 +126,8 @@ def run_keystroke_action(*, action, device, browser):
 
             for idx in range(len(parsed_key_list) - 1):
                 action_chain.key_up(parsed_key_list[idx])
+
+            action_chain.pause(app.config.get('pause_between_keys'))
 
         action_chain.perform()
 
@@ -183,6 +186,7 @@ def run_power_action(*, action, device, browser):
 
 def run_screenshot_action(*, action, device, browser):
     app.logger.debug(f"Running screenshot action for uid '{device['uid']}'")
+    time.sleep(15)
     try:
         screenshot = browser.get_screenshot_as_png()
     except Exception as err:
@@ -208,6 +212,6 @@ def run_screenshot_action(*, action, device, browser):
 def _add_char_to_action_chain(action_chain, char):
     regex_for_shift = re.compile(r'[~!@#$%^&*()_+|}{":?><A-Z]')
     if regex_for_shift.search(char) is None:
-        action_chain.send_keys(char)
+        action_chain.send_keys(char).pause(1)
     else:
-        action_chain.key_down(Keys.SHIFT).send_keys(char).key_up(Keys.SHIFT)
+        action_chain.key_down(Keys.SHIFT).send_keys(char).key_up(Keys.SHIFT).pause(1)
