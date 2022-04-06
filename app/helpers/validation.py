@@ -64,7 +64,7 @@ def validate_creds_name(*, creds_name):
 
 
 def validate_action_data_params(*, action_data):
-    match_list = re.findall(r'\{([^:}]*?)::([^}]*?)\}', action_data)
+    match_list = re.findall(r'\{([^:}]*?)::([^}]*?)\}', str(action_data))
     for match in match_list:
         if match[0] in VALID_PARAMS:
             if VALID_PARAMS[match[0]] and match[1] not in VALID_PARAMS[match[0]]:
