@@ -2,9 +2,10 @@ import datetime
 from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.orderinglist import ordering_list
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, LargeBinary
 
 from helpers.db import Base, SCHEMA
+import helpers.image as image_helper
 
 
 class RuleOrder(Base):
@@ -23,7 +24,8 @@ class Rule(Base):
 
     rule_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True, nullable=False)
-    state_id = Column(Integer, ForeignKey(f"{SCHEMA}.state.state_id"), nullable=False)
+    screenshot = Column(LargeBinary, nullable=False)
+    ocr_text = Column(String, nullable=False)
     regex = Column(String, nullable=False)
     actions = Column(JSON, nullable=False)
     ignore_case = Column(Boolean, nullable=False, default=True)
@@ -33,12 +35,10 @@ class Rule(Base):
     last_updated = Column(DateTime, onupdate=datetime.datetime.now, default=datetime.datetime.now)
     created_at = Column(DateTime, default=datetime.datetime.now)
 
-    state = relationship("State", back_populates="rule", uselist=False, foreign_keys=[state_id])
-
     def __repr__(self):
         return f"<Rule(rule_id='{self.rule_id}', " \
                f"name='{self.name}', " \
-               f"state_id='{self.state_id}', " \
+               f"ocr_text='{self.ocr_text}', " \
                f"regex='{self.regex}', " \
                f"actions='{self.actions}', " \
                f"ignore_case='{self.ignore_case}', " \
@@ -51,7 +51,8 @@ class Rule(Base):
         return {
             "rule_id": self.rule_id,
             "name": self.name,
-            "state_id": self.state_id,
+            "screenshot": image_helper.encode_image(self.screenshot),
+            "ocr_text": self.ocr_text,
             "regex": self.regex,
             "actions": self.actions,
             "ignore_case": self.ignore_case,

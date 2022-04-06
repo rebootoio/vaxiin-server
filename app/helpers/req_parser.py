@@ -54,7 +54,8 @@ def get_action_request_parser():
 def get_rule_request_parser():
     parser = get_base_parser()
     parser.add_argument('name', required=True, location='json', type=non_empty_string)
-    parser.add_argument('state_id', required=True, location='json', type=int)
+    parser.add_argument('state_id', required=False, location='json', type=int)
+    parser.add_argument('screenshot', required=False, location='json', type=non_empty_string)
     parser.add_argument('regex', required=True, location='json', type=non_empty_string)
     parser.add_argument('actions', required=True, location='json', type=list)
     parser.add_argument('ignore_case', required=False, location='json', type=bool, default=True)
@@ -68,7 +69,6 @@ def get_rule_request_parser():
 def get_rule_update_request_parser():
     parser = get_base_parser()
     parser.add_argument('name', required=True, location='json', type=non_empty_string)
-    parser.add_argument('state_id', required=False, location='json', type=int)
     parser.add_argument('regex', required=False, location='json', type=non_empty_string)
     parser.add_argument('actions', required=False, location='json', type=list)
     parser.add_argument('ignore_case', required=False, location='json', type=bool)

@@ -1,6 +1,10 @@
+import io
+
 from flask import current_app as app
 
 from models.rule import Rule, RuleOrder
+import services.state as state_service
+import helpers.image as image_helper
 from exceptions.base import RuleNameNotFound, RuleAlreadyExist
 
 
@@ -35,7 +39,16 @@ def create(**kwargs):
         new_position = get_by_name(after_rule).position
         update_position = True
 
-    rule = Rule(**kwargs)
+    if kwargs['screenshot'] is not None:
+        screenshot = image_helper.decode_image(kwargs['screenshot'])
+        ocr_text = image_helper.get_ocr_text(io.BytesIO(screenshot))
+    else:
+        state = state_service.get_by_id(kwargs['state_id'])
+        screenshot = state.screenshot
+        ocr_text = state.ocr_text
+
+    kwargs.pop('state_id')
+    rule = Rule(**{**kwargs, **{'screenshot': screenshot, 'ocr_text': ocr_text}})
 
     if update_position:
         rule_order.rules.insert(new_position, rule)
