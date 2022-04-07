@@ -18,7 +18,7 @@ from routes.device import ns as device_ns
 from routes.action import ns as action_ns
 from routes.rule import ns as rule_ns
 from routes.state import ns as state_ns
-from routes.state_screenshot import ns as state_screenshot_ns
+from routes.screenshot import ns as screenshot_ns
 from routes.work import ns as work_ns
 from routes.execution import ns as execution_ns
 from routes.heartbeat import ns as heartbeat_ns
@@ -48,7 +48,7 @@ def create_app():
     api.add_namespace(action_ns, default_path + '/action')
     api.add_namespace(rule_ns, default_path + '/rule')
     api.add_namespace(state_ns, default_path + '/state')
-    api.add_namespace(state_screenshot_ns, default_path + '/state-screenshot')
+    api.add_namespace(screenshot_ns, default_path + '/screenshot')
     api.add_namespace(work_ns, default_path + '/work')
     api.add_namespace(execution_ns, default_path + '/execution')
     api.add_namespace(heartbeat_ns, default_path + '/heartbeat')

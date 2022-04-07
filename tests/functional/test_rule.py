@@ -1,6 +1,6 @@
 
 
-def test_rule_create_endpoint_expect_success(client, headers, test_data):
+def test_rule_create_endpoint_with_state_id_expect_success(client, headers, test_data):
     client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     client.put('/api/v1/state/', headers=headers, json=test_data['state'])
     response = client.post('/api/v1/rule/', headers=headers, json=test_data['rule'])
@@ -8,11 +8,35 @@ def test_rule_create_endpoint_expect_success(client, headers, test_data):
 
     new_rule = response.json['rule']
     assert new_rule['name'] == test_data['rule']['name']
-    assert new_rule['state_id'] == test_data['rule']['state_id']
+    assert new_rule['screenshot'] == test_data['state']['screenshot']
+    assert new_rule['ocr_text'] == test_data['state']['ocr_text']
     assert new_rule['regex'] == test_data['rule']['regex']
     assert new_rule['actions'] == test_data['rule']['actions']
     assert new_rule['ignore_case'] == test_data['rule']['ignore_case']
     assert new_rule['enabled'] == test_data['rule']['enabled']
+
+
+def test_rule_create_endpoint_with_screenshot_expect_success(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['rule'].pop('state_id')
+    response = client.post('/api/v1/rule/', headers=headers, json={**test_data['rule'], **{'screenshot': test_data['state']['screenshot']}})
+    assert response.status_code == 200
+
+    new_rule = response.json['rule']
+    assert new_rule['name'] == test_data['rule']['name']
+    assert new_rule['screenshot'] == test_data['state']['screenshot']
+    assert new_rule['ocr_text'] == test_data['state']['ocr_text']
+    assert new_rule['regex'] == test_data['rule']['regex']
+    assert new_rule['actions'] == test_data['rule']['actions']
+    assert new_rule['ignore_case'] == test_data['rule']['ignore_case']
+    assert new_rule['enabled'] == test_data['rule']['enabled']
+
+
+def test_rule_create_endpoint_with_no_state_or_screenshot_failure(client, headers, test_data):
+    test_data['rule'].pop('state_id')
+    response = client.post('/api/v1/rule/', headers=headers, json=test_data['rule'])
+    assert response.status_code == 422
+    assert response.json['message'] == "Either 'state_id' OR 'screenshot' must be set"
 
 
 def test_rule_create_endpoint_expect_both_order_attr_cannot_be_set(client, headers, test_data):
@@ -63,7 +87,8 @@ def test_rule_update_endpoint_expect_success(client, headers, test_data):
 
     new_rule = response.json['rule']
     assert new_rule['name'] == test_data['rule']['name']
-    assert new_rule['state_id'] == test_data['rule']['state_id']
+    assert new_rule['screenshot'] == test_data['state']['screenshot']
+    assert new_rule['ocr_text'] == test_data['state']['ocr_text']
     assert new_rule['regex'] == test_data['rule']['regex']
     assert new_rule['actions'] == test_data['rule']['actions']
     assert new_rule['ignore_case'] is False
@@ -100,16 +125,6 @@ def test_rule_update_endpoint_expect_action_not_found(client, headers, test_data
     assert response.json['message'] == f"Action with name '{new_action_name}' was not found"
 
 
-def test_rule_update_endpoint_expect_state_not_found(client, headers, test_data):
-    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
-    client.put('/api/v1/state/', headers=headers, json=test_data['state'])
-    client.post('/api/v1/rule/', headers=headers, json=test_data['rule'])
-    new_state_id = 2
-    response = client.put('/api/v1/rule/', headers=headers, json={**test_data['rule'], **{'state_id': new_state_id}})
-    assert response.status_code == 422
-    assert response.json['message'] == f"State with id '{new_state_id}' was not found"
-
-
 def test_rule_update_endpoint_expect_not_found(client, headers, test_data):
     client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     client.put('/api/v1/state/', headers=headers, json=test_data['state'])
@@ -144,7 +159,8 @@ def test_rule_get_endpoint_expect_success(client, headers, test_data):
 
     new_rule = response.json['rules'][0]
     assert new_rule['name'] == test_data['rule']['name']
-    assert new_rule['state_id'] == test_data['rule']['state_id']
+    assert new_rule['screenshot'] == test_data['state']['screenshot']
+    assert new_rule['ocr_text'] == test_data['state']['ocr_text']
     assert new_rule['regex'] == test_data['rule']['regex']
     assert new_rule['actions'] == test_data['rule']['actions']
     assert new_rule['ignore_case'] == test_data['rule']['ignore_case']

@@ -33,6 +33,7 @@ class Rule(Resource):
         req_data = {
             'name': args.get('name'),
             'state_id': args.get('state_id'),
+            'screenshot': args.get('screenshot'),
             'regex': args.get('regex'),
             'actions': args.get('actions'),
             'ignore_case': args.get('ignore_case'),
@@ -46,10 +47,14 @@ class Rule(Resource):
         if req_data['after_rule'] is not None and req_data['before_rule'] is not None:
             abort(HTTPStatus.CONFLICT, "Please set either 'before_rule' OR 'after_rule'")
 
+        if req_data['screenshot'] is None and req_data['state_id'] is None:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, "Either 'state_id' OR 'screenshot' must be set")
+
         try:
             validation_helper.validate_regex(regex_string=req_data['regex'])
             validation_helper.validate_rule_actions(action_name_list=req_data['actions'])
-            validation_helper.validate_rule_state_id(state_id=req_data['state_id'])
+            if req_data['screenshot'] is None:
+                validation_helper.validate_rule_state_id(state_id=req_data['state_id'])
             rule = rule_service.create(**req_data)
             matcher_helper.match_all_open_states()
         except RuleAlreadyExist as err:
@@ -74,7 +79,6 @@ class Rule(Resource):
 
         req_data = {
             'name': args.get('name'),
-            'state_id': args.get('state_id'),
             'regex': args.get('regex'),
             'actions': args.get('actions'),
             'ignore_case': args.get('ignore_case'),
@@ -91,8 +95,6 @@ class Rule(Resource):
         try:
             if req_data.get('actions') is not None:
                 validation_helper.validate_rule_actions(action_name_list=req_data['actions'])
-            if req_data.get('state_id') is not None:
-                validation_helper.validate_rule_state_id(state_id=req_data['state_id'])
             if req_data.get('regex') is not None:
                 validation_helper.validate_regex(regex_string=req_data['regex'])
 
@@ -102,8 +104,6 @@ class Rule(Resource):
             abort(HTTPStatus.NOT_FOUND, f"Rule with name '{err.name}' was not found")
         except ActionNotFound as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Action with name '{err.name}' was not found")
-        except StateNotFound as err:
-            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"State with id '{err.id}' was not found")
         except RegexIsInvalid as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"Regex '{err.regex_string}' is invalid, error is: '{err.error}'")
 

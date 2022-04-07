@@ -1,11 +1,9 @@
 import re
 import io
-import base64
-import pytesseract
-from PIL import Image
 from flask import current_app as app
 
 from models.state import State
+import helpers.image as image_helper
 from exceptions.base import StateNotFound, StateNotFoundForDevice
 
 
@@ -108,14 +106,14 @@ def _filter_by_regex(state_list, regex):
 
 
 def create_or_update(*, device_uid, screenshot, resolved):
-    decoded_screenshot = base64.b64decode(screenshot.encode('ascii'))
-    ocr_text = pytesseract.image_to_string(Image.open(io.BytesIO(decoded_screenshot)))
+    decoded_screenshot = image_helper.decode_image(screenshot)
+    ocr_text = image_helper.get_ocr_text(io.BytesIO(decoded_screenshot))
     return _create_or_update(device_uid=device_uid, screenshot=decoded_screenshot, resolved=resolved, ocr_text=ocr_text)
 
 
 def create_or_update_from_file(*, device_uid, screenshot, resolved):
     screenshot_to_save = screenshot.read()
-    ocr_text = pytesseract.image_to_string(Image.open(screenshot))
+    ocr_text = image_helper.get_ocr_text(screenshot)
     return _create_or_update(device_uid=device_uid, screenshot=screenshot_to_save, resolved=resolved, ocr_text=ocr_text)
 
 
