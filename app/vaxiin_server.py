@@ -1,4 +1,5 @@
 import os
+import logging
 import traceback
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -109,6 +110,7 @@ def create_scheduler(app):
             max_instances=app.config.get('max_parallel_work')
         )
         sched.start()
+        logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
 
 
 def create_db(app, engine, session):
