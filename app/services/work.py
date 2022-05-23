@@ -7,7 +7,7 @@ from models.work import Work
 import services.creds as creds_service
 import services.device as device_service
 import services.execution as execution_service
-from exceptions.base import WorkNotFound, WorkNotFoundForDevice, WorkIsNotPending
+from exceptions.base import WorkNotFound, WorkNotFoundForDevice, WorkIsNotPending, CredsNameNotFound
 
 
 def get_by_id(work_id):
@@ -97,6 +97,28 @@ def get_assignment():
 
         parsed_actions = []
         for action in work.actions:
+            try:
+                cred_store_match_list = re.findall(r'\{cred_store::([^}]*?)::([^}]*?)?\}', action['data'])
+                for match in cred_store_match_list:
+                    cred = creds_service.get_by_name(match[0])
+                    action['data'] = action['data'].replace(f"{{cred_store::{match[0]}::{match[1]}}}", getattr(cred, match[1]))
+            except CredsNameNotFound as err:
+                app.logger.warning(f"Marking work as failed due to missing cred from cred store: {err.name}")
+                execution_service.create(**{
+                    'work_id': work.work_id,
+                    'state_id': work.state_id,
+                    'trigger': work.trigger,
+                    'action_name': 'Missing cred from store',
+                    'status': 'failure',
+                    'elapsed_time': 0.0,
+                    'run_data': f"Action '{action['name']}' requires the cred '{err.name}' but it was not found"
+                })
+                complete_by_id(
+                    work_id=work.work_id,
+                    status='failure'
+                )
+                return
+
             compiled_action_data = re.sub(r'\{([^:}]*?)::([^}]*?)\}', r'{\1[\2]}', action['data'])
             try:
                 action['data'] = compiled_action_data.format_map(params)

@@ -39,7 +39,7 @@ def test_action_create_endpoint_expect_param_key_error(client, headers, test_dat
     test_data['action']['action_data'] = "{hello::there}"
     response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     assert response.status_code == 422
-    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, metadata]"
+    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, cred_store, metadata]"
 
 
 def test_action_create_endpoint_expect_device_param_value_error(client, headers, test_data):
@@ -54,6 +54,20 @@ def test_action_create_endpoint_expect_creds_param_value_error(client, headers, 
     response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
     assert response.status_code == 422
     assert response.json['message'] == "The param value 'me' is invalid for 'cred'. Allowed values: [username, password]"
+
+
+def test_action_create_endpoint_expect_cred_store_param_missing_value_error(client, headers, test_data):
+    test_data['action']['action_data'] = "{cred_store::me}"
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param synatx for 'cred_store' is invalid. valid syntax is: 'cred_store::CRED_NAME::username|password)'"
+
+
+def test_action_create_endpoint_expect_cred_store_param_wrong_value_error(client, headers, test_data):
+    test_data['action']['action_data'] = "{cred_store::me::user}"
+    response = client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param synatx for 'cred_store' is invalid. valid syntax is: 'cred_store::CRED_NAME::username|password)'"
 
 
 def test_action_update_endpoint_expect_success(client, headers, test_data):
@@ -84,7 +98,7 @@ def test_action_update_endpoint_expect_param_key_error(client, headers, test_dat
     test_data['action']['action_data'] = "{hello::there}"
     response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
     assert response.status_code == 422
-    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, metadata]"
+    assert response.json['message'] == "The param key 'hello' is invalid. Allowed keys: [device, cred, cred_store, metadata]"
 
 
 def test_action_update_endpoint_expect_device_param_value_error(client, headers, test_data):
@@ -101,6 +115,22 @@ def test_action_update_endpoint_expect_creds_param_value_error(client, headers, 
     response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
     assert response.status_code == 422
     assert response.json['message'] == "The param value 'me' is invalid for 'cred'. Allowed values: [username, password]"
+
+
+def test_action_update_endpoint_expect_cred_store_param_missing_value_error(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['action']['action_data'] = "{cred_store::me}"
+    response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param synatx for 'cred_store' is invalid. valid syntax is: 'cred_store::CRED_NAME::username|password)'"
+
+
+def test_action_update_endpoint_expect_cred_store_param_wrong_value_error(client, headers, test_data):
+    client.post('/api/v1/action/', headers=headers, json=test_data['action'])
+    test_data['action']['action_data'] = "{cred_store::me::user}"
+    response = client.put('/api/v1/action/', headers=headers, json=test_data['action'])
+    assert response.status_code == 422
+    assert response.json['message'] == "The param synatx for 'cred_store' is invalid. valid syntax is: 'cred_store::CRED_NAME::username|password)'"
 
 
 def test_action_update_endpoint_expect_not_found(client, headers, test_data):
