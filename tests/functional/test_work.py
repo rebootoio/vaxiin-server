@@ -116,7 +116,7 @@ def test_work_assign_endpoint_with_params_expect_success(client, headers, test_d
     assert assignment['action_list'][0]['type'] == test_data['action_with_params']['action_type']
     device_data = test_data['device']
     creds_data = test_data['creds']
-    assert assignment['action_list'][0]['data'] == "{myparam} " + f"{device_data['model']} {device_data['ipmi_ip']} {device_data['uid']} {creds_data['username']} {creds_data['password']} {device_data['metadata']['hostname']}"
+    assert assignment['action_list'][0]['data'] == "{myparam} " + f"{device_data['model']} {device_data['ipmi_ip']} {device_data['uid']} {creds_data['username']} {creds_data['password']} {device_data['metadata']['hostname']} {creds_data['username']} {creds_data['password']}"
     assert assignment['device_data']['uid'] == test_data['device']['uid']
     assert assignment['device_data']['ip'] == test_data['device']['ipmi_ip']
     assert assignment['device_data']['model'] == test_data['device']['model']
@@ -146,6 +146,31 @@ def test_work_assign_endpoint_with_missing_metadata_expect_work_failure(client, 
     assert execution_data['action_name'] == "Missing metadata key"
     assert execution_data['status'] == "failure"
     assert execution_data['run_data'] == f"Action '{test_data['action_with_params']['name']}' requires the metadata key '{list(test_data['device']['metadata'].keys())[0]}' but it is not defined on the device"
+
+
+def test_work_assign_endpoint_with_missing_cred_from_store_expect_work_failure(client, headers, test_data):
+    client.post('/api/v1/creds/', headers=headers, json=test_data['creds'])
+    client.post('/api/v1/device/', headers=headers, json={**test_data['device'], **{'metadata': {}}})
+    test_data['action_with_params']['action_data'] = "fail {cred_store::missing cred::username}"
+    client.post('/api/v1/action/', headers=headers, json=test_data['action_with_params'])
+    test_data['work'].pop('rule')
+    test_data['work']['actions'] = [test_data['action_with_params']['name']]
+    client.post('/api/v1/work/', headers=headers, json=test_data['work'])
+    response = client.post('/api/v1/work/assign')
+    assert response.status_code == 200
+    assert response.json['assignment'] is None
+
+    response = client.get(f"/api/v1/work/by-id?id={test_data['work']['work_id']}")
+    assert response.status_code == 200
+    assert response.json['works'][0]['status'] == "failure"
+
+    response = client.get(f"/api/v1/execution/all/by-work-id?id={test_data['work']['work_id']}")
+    assert response.status_code == 200
+
+    execution_data = response.json['executions'][0]
+    assert execution_data['action_name'] == "Missing cred from store"
+    assert execution_data['status'] == "failure"
+    assert execution_data['run_data'] == f"Action '{test_data['action_with_params']['name']}' requires the cred 'missing cred' but it was not found"
 
 
 def test_work_assign_endpoint_expect_null(client):

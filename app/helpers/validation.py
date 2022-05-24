@@ -6,11 +6,12 @@ import services.state as state_service
 import services.work as work_service
 import services.creds as creds_service
 
-from exceptions.base import ActionInUse, CredsInUse, DeviceInUse, StateNotFoundForDevice, RegexIsInvalid, CredsNameIsReserved, UnknownActionParamKey, UnknownActionParamValue
+from exceptions.base import ActionInUse, CredsInUse, DeviceInUse, StateNotFoundForDevice, RegexIsInvalid, CredsNameIsReserved, UnknownActionParamKey, UnknownActionParamValue, UnknownActionCredStoreValue
 
 VALID_PARAMS = {
     'device': ["uid", "ipmi_ip", "model"],
     'cred': ["username", "password"],
+    'cred_store': ["username", "password"],
     'metadata': []
 }
 
@@ -64,10 +65,13 @@ def validate_creds_name(*, creds_name):
 
 
 def validate_action_data_params(*, action_data):
-    match_list = re.findall(r'\{([^:}]*?)::([^}]*?)\}', str(action_data))
+    match_list = re.findall(r'\{([^:}]*?)::([^}]*?)(::([^}]*?))?\}', str(action_data))
     for match in match_list:
         if match[0] in VALID_PARAMS:
-            if VALID_PARAMS[match[0]] and match[1] not in VALID_PARAMS[match[0]]:
+            if match[0] == "cred_store":
+                if match[3] not in VALID_PARAMS[match[0]]:
+                    raise UnknownActionCredStoreValue(match[0], match[1], match[3])
+            elif VALID_PARAMS[match[0]] and match[1] not in VALID_PARAMS[match[0]]:
                 raise UnknownActionParamValue(match[0], match[1])
         else:
             raise UnknownActionParamKey(match[0])

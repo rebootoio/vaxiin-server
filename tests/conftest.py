@@ -85,7 +85,7 @@ def test_data():
         "action_with_params": {
             "name": "test action with params",
             "action_type": "ipmitool",
-            "action_data": "{myparam} {device::model} {device::ipmi_ip} {device::uid} {cred::username} {cred::password} {metadata::hostname}"
+            "action_data": "{myparam} {device::model} {device::ipmi_ip} {device::uid} {cred::username} {cred::password} {metadata::hostname} {cred_store::test creds::username} {cred_store::test creds::password}"
         },
         "creds": {
             "name": "test creds",

@@ -10,7 +10,7 @@ import helpers.req_parser as req_parser_helper
 
 import services.action as action_service
 
-from exceptions.base import ActionAlreadyExist, ActionNotFound, ActionInUse, UnknownActionParamKey, UnknownActionParamValue
+from exceptions.base import ActionAlreadyExist, ActionNotFound, ActionInUse, UnknownActionParamKey, UnknownActionParamValue, UnknownActionCredStoreValue
 
 ns = Namespace('Action', description='Handle action')
 req_parser = req_parser_helper.get_action_request_parser()
@@ -45,6 +45,8 @@ class Action(Resource):
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param key '{err.key}' is invalid. Allowed keys: [{', '.join(validation_helper.VALID_PARAMS.keys())}]")
         except UnknownActionParamValue as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param value '{err.value}' is invalid for '{err.key}'. Allowed values: [{', '.join(validation_helper.VALID_PARAMS[err.key])}]")
+        except UnknownActionCredStoreValue as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param synatx for '{err.key}' is invalid. valid syntax is: 'cred_store::CRED_NAME::{'|'.join(validation_helper.VALID_PARAMS[err.key])})'")
 
         return {"action": action.to_dict()}, HTTPStatus.OK
 
@@ -73,6 +75,8 @@ class Action(Resource):
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param key '{err.key}' is invalid. Allowed keys: [{', '.join(validation_helper.VALID_PARAMS.keys())}]")
         except UnknownActionParamValue as err:
             abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param value '{err.value}' is invalid for '{err.key}'. Allowed values: [{', '.join(validation_helper.VALID_PARAMS[err.key])}]")
+        except UnknownActionCredStoreValue as err:
+            abort(HTTPStatus.UNPROCESSABLE_ENTITY, f"The param synatx for '{err.key}' is invalid. valid syntax is: 'cred_store::CRED_NAME::{'|'.join(validation_helper.VALID_PARAMS[err.key])})'")
 
         return {"action": action.to_dict()}, HTTPStatus.OK
 

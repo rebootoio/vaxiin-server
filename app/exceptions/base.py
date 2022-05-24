@@ -142,3 +142,11 @@ class UnknownActionParamValue(Error):
         self.key = key
         self.value = value
         self.message = message
+
+
+class UnknownActionCredStoreValue(Error):
+    def __init__(self, key, name, value, message="The action param for cred_store is not valid"):
+        self.key = key
+        self.name = name
+        self.value = value
+        self.message = message
