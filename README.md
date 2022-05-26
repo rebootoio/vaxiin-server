@@ -24,7 +24,11 @@
 </div>
 
 ## Overview
-**Vaxiin is an out-of-band automation framework** allowing for:  
+Vaxiin is an **autonomous [zombie](https://docs.vaxiin.io/#wait-what-zombies) recovery machine**.
+
+Or in more technical terms
+
+Vaxiin is an **out-of-band automation framework** allowing for:  
 - failure detection
 - remote state extraction
 - human and machine recovery emulation
