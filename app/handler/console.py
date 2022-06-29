@@ -2,6 +2,7 @@ import os
 import time
 from flask import current_app as app
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,7 +17,9 @@ def open_console(*, uid, ip, username, password, model):
         'idrac9': open_console_for_idrac9,
         'ilo5': open_console_for_ilo5,
         'ilo4': open_console_for_ilo4,
-        'x10': open_console_for_x10
+        'x10': open_console_for_x10,
+        'xcc': open_console_for_xcc,
+        'imm2': open_console_for_imm2
     }
 
     if model.lower() not in model_to_func_mapping:
@@ -48,7 +51,9 @@ def close_console(*, browser, model):
     model_to_func_mapping = {
         'ilo5': logout_for_ilo5,
         'ilo4': logout_for_ilo4,
-        'x10': logout_for_x10
+        'x10': logout_for_x10,
+        'xcc': logout_for_xcc,
+        'imm2': logout_for_imm2
     }
     if model.lower() in model_to_func_mapping:
         app.logger.debug(f"logging out")
@@ -241,17 +246,17 @@ def open_console_for_x10(*, ip, username, password, browser):
     try:
         WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.NAME, "name")))
     except TimeoutException:
-        OpenConsoleError("Failed to see username input element after 30s")
+        raise OpenConsoleError("Failed to see username input element after 30s")
 
     try:
         WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.NAME, "pwd")))
     except TimeoutException:
-        OpenConsoleError("Failed to see password input element after 30s")
+        raise OpenConsoleError("Failed to see password input element after 30s")
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "login_word")))
     except TimeoutException:
-        OpenConsoleError("Failed to get login button clickable after 30s")
+        raise OpenConsoleError("Failed to get login button clickable after 30s")
 
     browser.find_element_by_name('pwd').send_keys(password)
     browser.find_element_by_name('name').send_keys(username)
@@ -260,49 +265,49 @@ def open_console_for_x10(*, ip, username, password, browser):
     try:
         WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "TOPMENU")))
     except TimeoutException:
-        OpenConsoleError("Failed to see main frame")
+        raise OpenConsoleError("Failed to see main frame")
 
     browser.switch_to.frame(browser.find_element_by_id("TOPMENU"))
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "remote")))
     except TimeoutException:
-        OpenConsoleError("Failed to get Remote Control tab clickable after 30s")
+        raise OpenConsoleError("Failed to get Remote Control tab clickable after 30s")
 
     browser.find_element_by_id("remote").click()
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'iKVM/HTML5')]")))
     except TimeoutException:
-        OpenConsoleError("Failed to get Remote Control tab clickable after 30s")
+        raise OpenConsoleError("Failed to get Remote Control tab clickable after 30s")
 
     browser.find_element_by_xpath("//a[contains(text(), 'iKVM/HTML5')]").click()
 
     try:
         WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "frame_main")))
     except TimeoutException:
-        OpenConsoleError("Failed to see iKVM frame after 30s")
+        raise OpenConsoleError("Failed to see iKVM frame after 30s")
 
     browser.switch_to.frame(browser.find_element_by_id("frame_main"))
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.XPATH, "//input[@value='iKVM/HTML5']")))
     except TimeoutException:
-        OpenConsoleError("Failed to get iKVM button clickable after 30s")
+        raise OpenConsoleError("Failed to get iKVM button clickable after 30s")
 
     browser.find_element_by_xpath("//input[@value='iKVM/HTML5']").click()
 
     try:
         WebDriverWait(browser, 60).until(lambda browser: len(browser.window_handles) == 2)
     except TimeoutException:
-        OpenConsoleError("Failed to get new console window after 60s")
+        raise OpenConsoleError("Failed to get new console window after 60s")
 
     browser.switch_to.window(browser.window_handles[1])
 
     try:
         WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Close')]")))
     except TimeoutException:
-        OpenConsoleError("Failed to get recording warning close button clickable after 30s")
+        raise OpenConsoleError("Failed to get recording warning close button clickable after 30s")
 
     browser.find_element_by_xpath("//button[contains(text(), 'Close')]").click()
 
@@ -311,6 +316,118 @@ def open_console_for_x10(*, ip, username, password, browser):
     time.sleep(5)
     body = browser.find_element_by_tag_name('body')
     body.send_keys(Keys.SHIFT)
+    time.sleep(5)
+
+
+def open_console_for_xcc(*, ip, username, password, browser):
+    url = f'https://{ip}/'
+    browser.get(url)
+
+    try:
+        WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "login_username")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to see username input element after 30s")
+
+    browser.find_element_by_id('login_username').send_keys(username)
+    browser.find_element_by_id('login_password').send_keys(password)
+
+    try:
+        WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "login_right_submit_btn")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get login button clickable after 30s")
+
+    browser.find_element_by_id('login_right_submit_btn').click()
+
+    try:
+        WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "clickAndRunIcon")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get console launch button clickable after 30s")
+
+    browser.find_element_by_id('clickAndRunIcon').click()
+
+    try:
+        WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Launch Remote Console')]")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get console launch details button clickable after 30s")
+
+    browser.find_element_by_xpath("//span[contains(text(), 'Launch Remote Console')]").click()
+
+    try:
+        WebDriverWait(browser, 60).until(lambda browser: len(browser.window_handles) == 2)
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get new console window after 60s")
+
+    browser.switch_to.window(browser.window_handles[1])
+
+    try:
+        WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "canvasdiv")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to see console canvas after 30s")
+
+    browser.maximize_window()
+
+    time.sleep(5)
+    action_chain = ActionChains(browser)
+    action_chain.key_down(Keys.SHIFT).key_up(Keys.SHIFT).pause(1).perform()
+    time.sleep(5)
+
+
+def open_console_for_imm2(*, ip, username, password, browser):
+    url = f'https://{ip}/'
+    browser.get(url)
+
+    try:
+        WebDriverWait(browser, 30).until(EC.invisibility_of_element((By.XPATH, "//span[contains(text(), 'web server is initializing')]")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get web server initialization after 30s")
+
+    browser.find_element_by_id('user').send_keys(username)
+    browser.find_element_by_id('password').send_keys(password)
+
+    try:
+        WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "btnLogin")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get login button clickable after 30s")
+
+    browser.find_element_by_id('btnLogin').click()
+
+    try:
+        WebDriverWait(browser, 60).until(EC.element_to_be_clickable((By.ID, "btnRemoteConsoleHealthSumm_label")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get remote contorl button clickable after 60s")
+
+    browser.find_element_by_id('btnRemoteConsoleHealthSumm_label').click()
+
+    try:
+        WebDriverWait(browser, 30).until(EC.element_to_be_clickable((By.ID, "btnMulti_label")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get start remote session button clickable after 30s")
+
+    browser.find_element_by_id('rcClientType2').click()
+    browser.find_element_by_id('btnMulti_label').click()
+
+    try:
+        WebDriverWait(browser, 60).until(lambda browser: len(browser.window_handles) == 3)
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get console accept ssl window after 60s")
+
+    try:
+        WebDriverWait(browser, 60).until(lambda browser: len(browser.window_handles) == 2)
+    except TimeoutException:
+        raise OpenConsoleError("Failed to get new console window after 60s")
+
+    browser.switch_to.window(browser.window_handles[1])
+
+    try:
+        WebDriverWait(browser, 30).until(EC.visibility_of_element_located((By.ID, "kvmCanvas")))
+    except TimeoutException:
+        raise OpenConsoleError("Failed to see console canvas after 30s")
+
+    browser.maximize_window()
+
+    time.sleep(5)
+    action_chain = ActionChains(browser)
+    action_chain.key_down(Keys.SHIFT).key_up(Keys.SHIFT).pause(1).perform()
     time.sleep(5)
 
 
@@ -337,6 +454,24 @@ def logout_for_x10(*, browser):
     browser.switch_to.default_content()
     browser.switch_to.frame(browser.find_element_by_id("TOPMENU"))
     browser.find_element_by_link_text('Logout').click()
+
+
+def logout_for_xcc(*, browser):
+    _close_additional_windows(browser=browser)
+    browser.switch_to.window(browser.window_handles[0])
+    browser.find_element_by_id('immUser').click()
+    browser.find_element_by_xpath("//button[contains(text(), 'Logout')]").click()
+    body = browser.find_element_by_tag_name('body')
+    body.send_keys(Keys.TAB)
+    body.send_keys(Keys.TAB)
+    body.send_keys(Keys.TAB)
+    body.send_keys(Keys.ENTER)
+
+
+def logout_for_imm2(*, browser):
+    _close_additional_windows(browser=browser)
+    browser.switch_to.window(browser.window_handles[0])
+    browser.find_element_by_id('ibm-banner-login-link').click()
 
 
 def _close_additional_windows(*, browser):
